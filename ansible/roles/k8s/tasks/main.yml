@@ -1,0 +1,93 @@
+---
+#
+#
+#
+- name: Disable system swap
+  shell: "swapoff -a"
+  tags:
+    - swapoff
+    - kubernetes
+    - bootstrap
+
+- name: Remove current swaps from fstab
+  lineinfile:
+    dest: /etc/fstab
+    regexp: '(?i)^([^#][\S]+\s+(none|swap)\s+swap.*)'
+    line: '# \1'
+    backrefs: yes
+    state: present
+  tags:
+    - swapoff
+    - kubernetes
+    - bootstrap
+
+- name: "Kubernetes | Installing kubernetes"
+  apt:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
+    - selinux-utils
+  tags:
+    - kubernetes
+    - bootstrap
+
+- name: "Kubernetes | Reset Cluster"
+  shell: kubeadm reset -f
+  tags:
+    - reset
+    - kubernetes
+    - bootstrap
+
+- name: "Kubernetes | Initializing Cluster"
+  shell: kubeadm init --apiserver-cert-extra-sans={{ inventory_hostname }}  --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=NumCPU
+  tags:
+    - init_cluster
+    - kubernetes
+    - bootstrap
+
+- name: "Kuberenetes | Create kubectl config directory"
+  file:
+    path: ".kube/"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: directory
+  tags:
+    - kubectl
+    - kubernetes
+    - bootstrap
+
+- name: "Kuberntes | Copy admin.conf to user home directory"
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: ".kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: true
+  tags:
+    - kubectl
+    - kubernetes
+    - bootstrap
+
+
+- name: "Kubernetes | Enable pod scheduling on master node"
+  shell: kubectl  taint nodes --all node-role.kubernetes.io/master-
+  run_once: true
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+  tags:
+    - kubernetes
+    - bootstrap
+
+- name: "Kubectl | Fetching kubeconfig file to localhost"
+  fetch:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "../kube-config"
+    flat: yes
+  tags:
+    - kubectl_config
+    - client_config
+

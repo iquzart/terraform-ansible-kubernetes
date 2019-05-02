@@ -1,0 +1,14 @@
+---
+#
+#
+#
+- name: "CNI | Setting up Calico on kubernetes cluster"
+  command: kubectl apply -f  https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml 
+  run_once: true
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+  tags:
+     - cni
+     - bootstrap
+     - kuberntes
+     - calico

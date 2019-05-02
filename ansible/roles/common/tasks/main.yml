@@ -1,0 +1,54 @@
+---
+#
+#
+#
+- name: "Getting docker package key"
+  apt_key:
+     url: https://download.docker.com/linux/ubuntu/gpg
+     state: present
+  tags:
+     - apt
+     - docker
+     - bootstrap
+
+
+- name: "Getting kubernetes package key"
+  apt_key:
+     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+     state: present
+  tags:
+     - apt
+     - bootstrap
+     - kuberntes
+     - kubectl
+
+
+- name: "Adding docker repo"
+  apt_repository:
+     repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+     state: present
+  tags:
+     - apt
+     - docker
+     - bootstrap
+
+
+- name: "Adding kubernetes repo"
+  apt_repository:
+     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+     state: present
+  tags:
+     - apt
+     - bootstrap
+     - kuberntes
+     - kubectl
+
+
+#- name: "Install packages that allow apt to be used over HTTPS"
+#  apt:
+#     name: apt-transport-https
+#     state: installed
+#  tags:
+#     - apt
+
+
