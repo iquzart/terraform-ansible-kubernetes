@@ -1,4 +1,4 @@
-# Set up kubectl on Localhost
+# Set up kubectl on localhost
 resource "null_resource" "kubectl" {
   provisioner "local-exec" {
    command = "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl; chmod u+x kubectl"
